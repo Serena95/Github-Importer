@@ -98,7 +98,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ onDealClick, is
 
   const bellIcon = (
     <div className="relative">
-      <Bell className="h-5 w-5 text-slate-600 hover:text-blue-600 transition-colors" />
+      <Bell className="h-5 w-5 text-white/70 hover:text-white transition-colors" />
       {unreadCount > 0 && (
         <Badge 
           className="absolute -top-1.5 -right-1.5 h-4 min-w-4 p-0 items-center justify-center text-[10px] bg-red-500 hover:bg-red-600 border-2 border-white"

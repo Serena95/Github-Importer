@@ -526,7 +526,13 @@ const AppLayout: React.FC = () => {
 
             <NotificationCenter onDealClick={handleDealClick} />
 
-            <Button variant="ghost" size="icon" className="text-white/70 hover:text-white hidden sm:flex">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white/70 hover:text-white hover:bg-white/10 hidden sm:flex"
+              onClick={() => navigate('/settings')}
+              title="Aiuto e impostazioni"
+            >
               <HelpCircle size={20} />
             </Button>
             
@@ -538,7 +544,7 @@ const AppLayout: React.FC = () => {
                   <AvatarImage src={profile?.photoURL} />
                   <AvatarFallback className="bg-brand-blue text-white font-bold">{profile?.displayName?.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-black text-slate-800 hidden md:inline truncate max-w-[100px]">{profile?.displayName}</span>
+                <span className="text-sm font-black text-white hidden md:inline truncate max-w-[100px]">{profile?.displayName}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>Account</DropdownMenuLabel>
