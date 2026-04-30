@@ -72,7 +72,7 @@ const Login: React.FC = () => {
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-4 shadow-xl shadow-blue-200">
             <Layout size={32} />
           </div>
-          <h1 className="text-3xl font-black tracking-tighter text-slate-800">Nexus CRM</h1>
+          <h1 className="text-3xl font-black tracking-tighter text-blue-600">Nexus CRM</h1>
           <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Smarter Workspace</p>
         </div>
 
