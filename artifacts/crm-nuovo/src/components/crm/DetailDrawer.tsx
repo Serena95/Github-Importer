@@ -57,6 +57,7 @@ import { supabaseCRMService } from '@/services/supabaseCRMService';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import CoPilotPanel from './CoPilotPanel';
 import {
   Select,
   SelectContent,
@@ -263,6 +264,17 @@ export const DetailDrawer: React.FC<DetailDrawerProps> = ({ isOpen, onClose, ite
             </div>
 
             <div className="flex items-center gap-1 md:gap-2 shrink-0">
+              {/* CoPilot AI - Bitrix-style */}
+              <CoPilotPanel
+                recordType={type}
+                record={item}
+                context={{
+                  pipeline: currentPipeline?.name,
+                  stage: currentStage?.name,
+                  responsible: currentResponsible.name,
+                }}
+                variant="icon"
+              />
               {/* Mobile Options Menu */}
               <Button variant="ghost" size="icon" className="md:hidden h-8 w-8 text-slate-400">
                 <MoreHorizontal size={18} />
