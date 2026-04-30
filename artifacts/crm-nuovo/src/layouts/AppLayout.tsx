@@ -78,6 +78,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from '@/lib/utils';
 import { GlobalSearch } from '../components/crm/GlobalSearch';
 import { useCRMPermissions } from '@/hooks/useCRMPermissions';
@@ -526,15 +534,114 @@ const AppLayout: React.FC = () => {
 
             <NotificationCenter onDealClick={handleDealClick} />
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white/70 hover:text-white hover:bg-white/10 hidden sm:flex"
-              onClick={() => navigate('/settings')}
-              title="Aiuto e impostazioni"
-            >
-              <HelpCircle size={20} />
-            </Button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white/70 hover:text-white hover:bg-white/10 hidden sm:flex"
+                  title="Guida e aiuto"
+                >
+                  <HelpCircle size={20} />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[90%] sm:w-[440px] p-0 flex flex-col">
+                <SheetHeader className="p-6 border-b bg-gradient-to-br from-blue-50 to-white">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white">
+                      <HelpCircle size={20} />
+                    </div>
+                    <div>
+                      <SheetTitle className="text-lg font-bold text-slate-800">Guida Nexus CRM</SheetTitle>
+                      <SheetDescription className="text-xs text-slate-500">
+                        Tutto quello che ti serve per iniziare
+                      </SheetDescription>
+                    </div>
+                  </div>
+                </SheetHeader>
+
+                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                  <section>
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-blue-600 mb-3">Inizia da qui</h3>
+                    <div className="space-y-2">
+                      <div className="flex gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-800">Crea il tuo primo affare</p>
+                          <p className="text-xs text-slate-500 mt-0.5">Vai su <strong>CRM › Affari</strong> e clicca "Nuovo affare". Trascinalo tra le colonne per aggiornarne lo stato.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-800">Aggiungi contatti e aziende</p>
+                          <p className="text-xs text-slate-500 mt-0.5">Le sezioni <strong>Contatti</strong> e <strong>Aziende</strong> ti permettono di costruire la tua rubrica clienti.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-800">Organizza il lavoro con i Task</p>
+                          <p className="text-xs text-slate-500 mt-0.5">In <strong>Task e progetti</strong> puoi creare attività, assegnarle al team e seguirle in vista Kanban o Gantt.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section>
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-blue-600 mb-3">Sezioni principali</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-3 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => navigate('/crm/affari')}>
+                        <Briefcase size={16} className="text-blue-600 mb-1.5" />
+                        <p className="text-xs font-bold text-slate-800">CRM</p>
+                        <p className="text-[10px] text-slate-500">Lead, affari, contatti</p>
+                      </div>
+                      <div className="p-3 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => navigate('/tasks')}>
+                        <CheckSquare size={16} className="text-blue-600 mb-1.5" />
+                        <p className="text-xs font-bold text-slate-800">Task</p>
+                        <p className="text-[10px] text-slate-500">Attività e progetti</p>
+                      </div>
+                      <div className="p-3 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => navigate('/calendar')}>
+                        <CalendarIcon size={16} className="text-blue-600 mb-1.5" />
+                        <p className="text-xs font-bold text-slate-800">Calendario</p>
+                        <p className="text-[10px] text-slate-500">Eventi e appuntamenti</p>
+                      </div>
+                      <div className="p-3 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => navigate('/feed')}>
+                        <Activity size={16} className="text-blue-600 mb-1.5" />
+                        <p className="text-xs font-bold text-slate-800">Feed</p>
+                        <p className="text-[10px] text-slate-500">Attività del team</p>
+                      </div>
+                      <div className="p-3 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => navigate('/drive')}>
+                        <HardDrive size={16} className="text-blue-600 mb-1.5" />
+                        <p className="text-xs font-bold text-slate-800">Drive</p>
+                        <p className="text-[10px] text-slate-500">File e documenti</p>
+                      </div>
+                      <div className="p-3 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => navigate('/settings')}>
+                        <SettingsIcon size={16} className="text-blue-600 mb-1.5" />
+                        <p className="text-xs font-bold text-slate-800">Impostazioni</p>
+                        <p className="text-[10px] text-slate-500">Profilo e workspace</p>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section>
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-blue-600 mb-3">Suggerimenti rapidi</h3>
+                    <ul className="space-y-2 text-xs text-slate-600">
+                      <li className="flex gap-2"><span className="text-blue-600 font-bold">›</span> Usa la <strong>barra di ricerca</strong> in alto per trovare velocemente affari, contatti o aziende.</li>
+                      <li className="flex gap-2"><span className="text-blue-600 font-bold">›</span> Riduci la barra laterale con il pulsante menu per avere più spazio di lavoro.</li>
+                      <li className="flex gap-2"><span className="text-blue-600 font-bold">›</span> Clicca un affare per aprirne i dettagli e modificarlo.</li>
+                      <li className="flex gap-2"><span className="text-blue-600 font-bold">›</span> Le notifiche (icona campanella) ti tengono aggiornato sulle attività del team.</li>
+                    </ul>
+                  </section>
+
+                  <section className="pt-4 border-t border-slate-100">
+                    <p className="text-[11px] text-slate-400 text-center">
+                      Hai bisogno di altro aiuto? Vai in <button onClick={() => navigate('/settings')} className="text-blue-600 font-bold hover:underline">Impostazioni</button> per gestire account e workspace.
+                    </p>
+                  </section>
+                </div>
+              </SheetContent>
+            </Sheet>
             
             <div className="h-8 w-[1px] bg-white/10 mx-1 lg:mx-2 hidden xs:block"></div>
             
