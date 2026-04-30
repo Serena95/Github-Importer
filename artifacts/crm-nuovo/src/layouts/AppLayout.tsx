@@ -91,6 +91,11 @@ import { GlobalSearch } from '../components/crm/GlobalSearch';
 import { useCRMPermissions } from '@/hooks/useCRMPermissions';
 import { useCRMStore } from '@/stores/crmStore';
 import { format } from 'date-fns';
+import QuickCreate from '../components/QuickCreate';
+import OnlineDot from '../components/OnlineDot';
+import { usePresence } from '@/hooks/usePresence';
+import { usePresenceStore } from '@/stores/presenceStore';
+import { useDesktopNotifications } from '@/hooks/useDesktopNotifications';
 
 const ICONS = [
   { name: 'DollarSign', icon: DollarSign },
@@ -122,6 +127,18 @@ const AppLayout: React.FC = () => {
   const crmScrollRef = useDraggableScroll();
 
   const isCRM = location.pathname.includes('/crm');
+
+  // Bitrix-style: track current user presence + subscribe to tenant presence + desktop notifs
+  usePresence();
+  useDesktopNotifications();
+  const initPresence = usePresenceStore((s) => s.init);
+  const cleanupPresence = usePresenceStore((s) => s.cleanup);
+  useEffect(() => {
+    if (profile?.tenantId) {
+      initPresence(profile.tenantId);
+      return () => cleanupPresence();
+    }
+  }, [profile?.tenantId, initPresence, cleanupPresence]);
 
   const crmTabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/crm/dashboard' },
@@ -647,10 +664,13 @@ const AppLayout: React.FC = () => {
             
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 hover:bg-white/10 p-1 rounded-lg transition-colors outline-none shrink-0 min-w-0">
-                <Avatar className="h-8 w-8 border border-white/20 shrink-0 rounded-lg">
-                  <AvatarImage src={profile?.photoURL} />
-                  <AvatarFallback className="bg-brand-blue text-white font-bold">{profile?.displayName?.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <div className="relative shrink-0">
+                  <Avatar className="h-8 w-8 border border-white/20 rounded-lg">
+                    <AvatarImage src={profile?.photoURL} />
+                    <AvatarFallback className="bg-brand-blue text-white font-bold">{profile?.displayName?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <OnlineDot uid={profile?.uid} size="md" />
+                </div>
                 <span className="text-sm font-black text-white hidden md:inline truncate max-w-[100px]">{profile?.displayName}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -737,6 +757,9 @@ const AppLayout: React.FC = () => {
            <Outlet />
         </div>
 
+
+        {/* Quick Create FAB - Bitrix-style "+" */}
+        <QuickCreate />
 
         {/* AI Agent Bubble - Bottom Right */}
         <div className="fixed right-4 bottom-24 lg:bottom-8 z-[70]">
