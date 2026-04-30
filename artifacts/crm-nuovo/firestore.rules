@@ -1,0 +1,317 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default Deny
+    match /{document=**} { allow read, write: if false; }
+
+    // Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isAdmin() { return isSignedIn() && (request.auth.token.email == "serena.serena0395@gmail.com" && request.auth.token.email_verified == true); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    // Connection test
+    match /test/connection { allow read: if true; }
+
+    // --- Users ---
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'username', 'displayName']) &&
+             data.uid == request.auth.uid &&
+             data.username is string && data.username.size() <= 30 &&
+             data.displayName is string && data.displayName.size() <= 50;
+    }
+
+    match /social_users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'bio', 'followingCount', 'followersCount', 'postsCount'])
+      );
+    }
+
+    // --- Posts ---
+    function isValidPost(data) {
+      return data.keys().hasAll(['id', 'userId', 'type', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.type in ['text', 'image', 'video', 'poll', 'ad'] &&
+             (!('content' in data) || (data.content is string && data.content.size() <= 10000)) &&
+             (!('mediaUrls' in data) || (data.mediaUrls is list && data.mediaUrls.size() <= 10));
+    }
+
+    match /social_posts/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidPost(incoming()) && isValidId(postId);
+      allow update: if (isOwner(existing().userId) || isAdmin()) && isValidPost(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['content', 'mediaUrls', 'isPinned', 'isSponsored', 'likesCount', 'commentsCount', 'score'])
+      );
+      allow delete: if isOwner(existing().userId) || isAdmin();
+    }
+
+    // --- Polls ---
+    function isValidPoll(data) {
+      return data.keys().hasAll(['id', 'question', 'options', 'createdBy']) &&
+             data.createdBy == request.auth.uid &&
+             data.options is list && data.options.size() >= 2 && data.options.size() <= 6;
+    }
+
+    match /social_polls/{pollId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidPoll(incoming());
+      allow update: if isSignedIn() && (
+        // Voting logic: only incrementing votes count
+        incoming().diff(existing()).affectedKeys().hasOnly(['totalVotes', 'options'])
+      );
+    }
+
+    // --- Comments ---
+    function isValidComment(data) {
+      return data.keys().hasAll(['id', 'postId', 'userId', 'text', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.text is string && data.text.size() <= 2000;
+    }
+
+    match /social_comments/{commentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidComment(incoming());
+      allow update: if (isOwner(existing().userId) || isAdmin()) && isValidComment(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['text', 'likesCount'])
+      );
+      allow delete: if (isOwner(existing().userId) || isAdmin());
+    }
+
+    // --- CRM Workspace Logic ---
+    function isMember(wsId) {
+      return isSignedIn() && exists(/databases/$(database)/documents/crm_workspace_members/$(wsId + "_" + request.auth.uid));
+    }
+
+    match /crm_workspaces/{wsId} {
+      allow read: if isMember(wsId);
+      allow create: if isSignedIn();
+      allow update: if isMember(wsId) && (resource.data.owner_id == request.auth.uid || get(/databases/$(database)/documents/crm_workspace_members/$(wsId + "_" + request.auth.uid)).data.role in ['owner', 'admin']);
+      allow delete: if isSignedIn() && resource.data.owner_id == request.auth.uid;
+    }
+
+    match /crm_workspace_members/{memberId} {
+      allow read: if isSignedIn() && (resource.data.user_id == request.auth.uid || isMember(resource.data.workspace_id));
+      allow create: if isSignedIn();
+      allow update, delete: if isMember(resource.data.workspace_id) && 
+        get(/databases/$(database)/documents/crm_workspace_members/$(resource.data.workspace_id + "_" + request.auth.uid)).data.role in ['owner', 'admin'];
+    }
+
+    // --- CRM Logic (Nexus) ---
+    match /crm_structures/{id} {
+      allow read: if isMember(resource.data.workspace_id);
+      allow create: if isMember(incoming().workspace_id);
+      allow update: if isMember(existing().workspace_id);
+      allow delete: if isMember(existing().workspace_id) && 
+        get(/databases/$(database)/documents/crm_workspace_members/$(existing().workspace_id + "_" + request.auth.uid)).data.role in ['owner', 'admin'];
+    }
+    
+    match /crm_stages/{id} {
+      allow read: if isSignedIn(); // Read is loose because we filter by structure_id in client
+      allow write: if isSignedIn();
+    }
+    
+    match /crm_deals/{id} {
+      allow read: if isAdmin() || isMember(resource.data.workspace_id);
+      allow create: if isMember(incoming().workspace_id);
+      allow update: if isAdmin() || isMember(existing().workspace_id);
+      allow delete: if isAdmin() || isMember(existing().workspace_id);
+    }
+
+    match /crm_contacts/{id} {
+      allow read: if isAdmin() || isMember(resource.data.workspace_id);
+      allow create: if isMember(incoming().workspace_id);
+      allow update: if isAdmin() || isMember(existing().workspace_id);
+      allow delete: if isAdmin() || isMember(existing().workspace_id);
+    }
+
+    match /crm_companies/{id} {
+      allow read: if isAdmin() || isMember(resource.data.workspace_id);
+      allow create: if isMember(incoming().workspace_id);
+      allow update: if isAdmin() || isMember(existing().workspace_id);
+      allow delete: if isAdmin() || isMember(existing().workspace_id);
+    }
+    
+    match /crm_activities/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin() || isSignedIn();
+    }
+    
+    match /crm_automations/{id} {
+      allow read: if isMember(resource.data.workspace_id);
+      allow write: if isMember(incoming().workspace_id || existing().workspace_id);
+    }
+    
+    match /crm_field_definitions/{id} {
+      allow read: if isSignedIn(); // Field definitions can be global or scoped
+      allow write: if isSignedIn();
+    }
+    
+    match /crm_form_results/{id} {
+      allow read: if isSignedIn();
+      allow create: if true; // Public submissions
+    }
+    
+    match /whatsapp_templates/{id} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    match /whatsapp_messages/{id} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    match /crm_smart_processes/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /smart_records/{id} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    match /smart_fields/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    match /calendar_events/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.assigned_to == request.auth.uid);
+    }
+    match /crm_tasks/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.assigned_to == request.auth.uid);
+    }
+    match /crm_files/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.uploaded_by == request.auth.uid);
+    }
+    match /crm_signatures/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+    match /crm_products/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    match /crm_quotes/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+    match /crm_portal_access/{id} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow delete: if isSignedIn();
+    }
+
+    // --- Activity Feed ---
+    match /feed_posts/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.author_id == request.auth.uid);
+    }
+    match /feed_comments/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.author_id == request.auth.uid;
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.author_id == request.auth.uid);
+    }
+    match /feed_reactions/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.user_id == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+    }
+
+    // --- CRM Notifications ---
+    function isValidCRMNotification(data) {
+      return data.keys().hasAll(['userId', 'type', 'title', 'description', 'dealId', 'dealTitle', 'read', 'createdAt', 'createdBy']) &&
+             (data.userId == request.auth.uid || data.userId == 'all') &&
+             data.type is string &&
+             data.title is string && data.title.size() <= 200 &&
+             data.description is string && data.description.size() <= 1000 &&
+             data.dealId is string &&
+             data.read is bool;
+    }
+
+    match /notifications/{notifId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.userId == 'all');
+      allow update: if isOwner(resource.data.userId) && incoming().diff(existing()).affectedKeys().hasOnly(['read']);
+      allow create: if isSignedIn(); // Allow any signed in user to trigger notifications
+    }
+
+    // --- Public Leads ---
+    match /leads/{leadId} {
+      allow create: if true; // Allows public form submission from landing page
+      allow read, update, delete: if isAdmin();
+    }
+
+    // --- Social Notifications ---
+    match /social_notifications/{notifId} {
+      allow read: if isOwner(resource.data.recipientId);
+      allow update: if isOwner(resource.data.recipientId) && incoming().diff(existing()).affectedKeys().hasOnly(['isRead']);
+      allow create: if isSignedIn(); // Simplified: anyone can trigger a notification if they interact
+    }
+
+    // --- Social Actions (Follows, Likes, Saved) ---
+    match /social_followers/{id} {
+      allow read: if isSignedIn();
+      allow create, delete: if isOwner(incoming().followerId) || isOwner(existing().followerId);
+    }
+
+    match /social_likes/{id} {
+      allow read: if isSignedIn();
+      allow create, delete: if isOwner(incoming().userId) || isOwner(existing().userId);
+    }
+
+    match /social_saved/{id} {
+      allow read: if isOwner(resource.data.userId);
+      allow create, delete: if isOwner(incoming().userId) || isOwner(existing().userId);
+    }
+
+    // --- Profiles (Legacy/Global) ---
+    match /profiles/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // --- Tenants (Legacy/CRM) ---
+    match /tenants/{tenantId} {
+      allow read, write: if isSignedIn() && (
+        exists(/databases/$(database)/documents/tenants/$(tenantId)/users/$(request.auth.uid)) ||
+        tenantId == "tenant_" + request.auth.uid ||
+        isAdmin()
+      );
+      
+      match /{document=**} {
+        allow read, write: if isSignedIn() && (
+          exists(/databases/$(database)/documents/tenants/$(tenantId)/users/$(request.auth.uid)) ||
+          tenantId == "tenant_" + request.auth.uid ||
+          isAdmin()
+        );
+      }
+    }
+
+    // Legacy Support (Admin only root access)
+    match /tenants_backup/{tenantId}/{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

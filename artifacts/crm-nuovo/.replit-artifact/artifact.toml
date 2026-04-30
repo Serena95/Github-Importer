@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "CRM Nuovo"
+version = "1.0.0"
+id = "artifacts/crm-nuovo"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18657
+
+[services.development]
+run = "pnpm --filter @workspace/crm-nuovo run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/crm-nuovo", "run", "build" ]
+publicDir = "artifacts/crm-nuovo/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18657"
+BASE_PATH = "/"

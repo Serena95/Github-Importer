@@ -1,0 +1,942 @@
+{
+  "entities": {
+    "Tenant": {
+      "title": "Tenant",
+      "description": "A company or organization using the SaaS platform.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "plan": { "type": "string", "enum": ["free", "pro", "enterprise"] }
+      },
+      "required": ["id", "name", "createdAt", "plan"]
+    },
+    "User": {
+      "title": "User",
+      "description": "A user belonging to a tenant.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "uid": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "manager", "sales", "support"] },
+        "photoURL": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "inactive", "pending"] }
+      },
+      "required": ["id", "tenantId", "email", "role"]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "A potential customer or sales lead.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "title": { "type": "string" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "companyName": { "type": "string" },
+        "emails": { "type": "array", "items": { "type": "string" } },
+        "phones": { "type": "array", "items": { "type": "string" } },
+        "whatsapp": { "type": "string" },
+        "telegram": { "type": "string" },
+        "website": { "type": "string" },
+        "source": { "type": "string" },
+        "campaign": { "type": "string" },
+        "utmSource": { "type": "string" },
+        "utmMedium": { "type": "string" },
+        "utmCampaign": { "type": "string" },
+        "value": { "type": "number" },
+        "currency": { "type": "string" },
+        "pipelineId": { "type": "string" },
+        "stageId": { "type": "string" },
+        "assignedTo": { "type": "string" },
+        "probability": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "converted", "junk"] },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "string" },
+        "attachments": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "lastActivityAt": { "type": "string", "format": "date-time" },
+        "nextActivityAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "title", "status", "pipelineId", "stageId"]
+    },
+    "Deal": {
+      "title": "Deal",
+      "description": "A sales opportunity in a pipeline.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "workspace_id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "title": { "type": "string" },
+        "pipelineId": { "type": "string" },
+        "stageId": { "type": "string" },
+        "value": { "type": "number" },
+        "currency": { "type": "string" },
+        "probability": { "type": "number" },
+        "assignedTo": { "type": "string" },
+        "contactId": { "type": "string" },
+        "companyId": { "type": "string" },
+        "products": { "type": "array", "items": { "$ref": "ProductItem" } },
+        "discount": { "type": "number" },
+        "tax": { "type": "number" },
+        "total": { "type": "number" },
+        "closingDate": { "type": "string", "format": "date-time" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "string" },
+        "attachments": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "title", "pipelineId", "stageId"]
+    },
+    "ProductItem": {
+      "title": "ProductItem",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "quantity": { "type": "number" }
+      }
+    },
+    "Contact": {
+      "title": "Contact",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "companyId": { "type": "string" },
+        "role": { "type": "string" },
+        "emails": { "type": "array", "items": { "type": "string" } },
+        "phones": { "type": "array", "items": { "type": "string" } },
+        "whatsapp": { "type": "string" },
+        "telegram": { "type": "string" },
+        "linkedin": { "type": "string" },
+        "address": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "firstName", "lastName"]
+    },
+    "Company": {
+      "title": "Company",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "name": { "type": "string" },
+        "industry": { "type": "string" },
+        "employees": { "type": "number" },
+        "revenue": { "type": "number" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "website": { "type": "string" },
+        "vatNumber": { "type": "string" },
+        "address": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "name"]
+    },
+    "Pipeline": {
+      "title": "Pipeline",
+      "description": "A sales process with multiple stages.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "name": { "type": "string" },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "color": { "type": "string" },
+              "order": { "type": "number" },
+              "probability": { "type": "number" }
+            }
+          }
+        }
+      },
+      "required": ["id", "tenantId", "name", "stages"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A task assigned to a user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "assignedTo": { "type": "string" },
+        "collaborators": { "type": "array", "items": { "type": "string" } },
+        "checklist": { "type": "array", "items": { "$ref": "ChecklistItem" } },
+        "subtasks": { "type": "array", "items": { "type": "string" } },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "in-progress", "completed", "deferred"] },
+        "attachments": { "type": "array", "items": { "type": "string" } },
+        "comments": { "type": "array", "items": { "$ref": "TaskComment" } },
+        "creatorId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "title", "status", "creatorId"]
+    },
+    "ChecklistItem": {
+      "title": "ChecklistItem",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "completed": { "type": "boolean" }
+      }
+    },
+    "TaskComment": {
+      "title": "TaskComment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "An interaction with a lead or contact.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "type": { "type": "string", "enum": ["call", "email", "meeting", "task", "note"] },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "duration": { "type": "number" },
+        "assignedTo": { "type": "string" },
+        "status": { "type": "string", "enum": ["planned", "completed", "cancelled"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+        "relatedTo": { "type": "string", "enum": ["lead", "deal", "contact", "company"] },
+        "relatedId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "type", "title", "relatedTo", "relatedId"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A chat message.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "channelId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderPhoto": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "channelId", "senderId", "content", "createdAt"]
+    },
+    "Automation": {
+      "title": "Automation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "name": { "type": "string" },
+        "trigger": { "type": "object" },
+        "actions": { "type": "array", "items": { "type": "object" } },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "tenantId", "name", "trigger", "actions"]
+    },
+    "NexusClient": {
+      "title": "NexusClient",
+      "description": "Main Nexus Client record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "name"]
+    },
+    "NexusRecord": {
+      "title": "NexusRecord",
+      "description": "Generic record for Nexus sub-modules.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "clientId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "value": { "type": "number" },
+        "status": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "clientId", "title"]
+    },
+    "Quote": {
+      "title": "Quote",
+      "description": "Sales quote/estimate.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "cliente_id": { "type": "string" },
+        "azienda_id": { "type": "string" },
+        "deal_id": { "type": "string" },
+        "titolo": { "type": "string" },
+        "descrizione": { "type": "string" },
+        "stato": { "type": "string", "enum": ["bozza", "inviato", "accettato", "rifiutato"] },
+        "totale": { "type": "number" },
+        "valuta": { "type": "string" },
+        "data_creazione": { "type": "string", "format": "date-time" },
+        "data_scadenza": { "type": "string", "format": "date-time" },
+        "prodotti": { "type": "array", "items": { "$ref": "QuoteItem" } },
+        "servizi": { "type": "array", "items": { "$ref": "QuoteItem" } },
+        "note": { "type": "string" },
+        "termini_pagamento": { "type": "string" },
+        "iban": { "type": "string" },
+        "validita": { "type": "string" },
+        "allegati": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "tenantId", "cliente_id", "titolo", "stato", "totale"]
+    },
+    "QuoteItem": {
+      "title": "QuoteItem",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "description": { "type": "string" },
+        "quantity": { "type": "number" },
+        "unit": { "type": "string" },
+        "price": { "type": "number" },
+        "discount": { "type": "number" },
+        "tax": { "type": "number" },
+        "total": { "type": "number" }
+      }
+    },
+    "NexusPreventivo": {
+      "title": "NexusPreventivo",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "cliente_nome": { "type": "string" },
+        "cliente_indirizzo": { "type": "string" },
+        "cliente_piva": { "type": "string" },
+        "cliente_email": { "type": "string" },
+        "items": { "type": "array", "items": { "type": "object" } },
+        "totale_complessivo": { "type": "number" },
+        "data_creazione": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "cliente_nome", "items", "totale_complessivo"]
+    },
+    "WhatsAppTemplate": {
+      "title": "WhatsAppTemplate",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "language": { "type": "string" },
+        "body": { "type": "string" },
+        "status": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CRMCalendarEvent": {
+      "title": "CRMCalendarEvent",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["call", "meeting", "task", "followup", "deadline"] },
+        "start_date": { "type": "string", "format": "date-time" },
+        "end_date": { "type": "string", "format": "date-time" },
+        "deal_id": { "type": "string" },
+        "assigned_to": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] }
+      }
+    },
+    "CRMTask": {
+      "title": "CRMTask",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["todo", "in_progress", "completed", "blocked"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "urgent"] },
+        "due_date": { "type": "string", "format": "date-time" },
+        "assigned_to": { "type": "string" },
+        "related_to_id": { "type": "string" },
+        "related_to_type": { "type": "string", "enum": ["deal", "contact", "company"] },
+        "created_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CRMFile": {
+      "title": "CRMFile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "size": { "type": "number" },
+        "type": { "type": "string" },
+        "url": { "type": "string" },
+        "path": { "type": "string" },
+        "related_to_id": { "type": "string" },
+        "related_to_type": { "type": "string", "enum": ["deal", "contact", "company"] },
+        "uploaded_by": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "category": { "type": "string", "enum": ["contract", "quote", "invoice", "document", "other"] }
+      }
+    },
+    "CRMProduct": {
+      "title": "CRMProduct",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CRMQuote": {
+      "title": "CRMQuote",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "deal_id": { "type": "string" },
+        "title": { "type": "string" },
+        "total_amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["draft", "sent", "accepted", "rejected"] },
+        "created_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ClientPortalAccess": {
+      "title": "ClientPortalAccess",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "deal_id": { "type": "string" },
+        "token": { "type": "string" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "created_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CRMSignature": {
+      "title": "CRMSignature",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "deal_id": { "type": "string" },
+        "document_name": { "type": "string" },
+        "document_url": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "sent", "signed", "rejected"] },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "signed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "SocialUser": {
+      "title": "SocialUser",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "username": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "bio": { "type": "string" },
+        "followersCount": { "type": "number" },
+        "followingCount": { "type": "number" },
+        "postsCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "username", "displayName"]
+    },
+    "SocialPost": {
+      "title": "SocialPost",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "image", "video", "poll", "ad"] },
+        "content": { "type": "string" },
+        "mediaUrls": { "type": "array", "items": { "type": "string" } },
+        "link": { "type": "string" },
+        "likesCount": { "type": "number" },
+        "commentsCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "isPinned": { "type": "boolean" },
+        "isSponsored": { "type": "boolean" },
+        "pollId": { "type": "string" },
+        "score": { "type": "number" }
+      },
+      "required": ["id", "userId", "type", "createdAt"]
+    },
+    "SocialPoll": {
+      "title": "SocialPoll",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "question": { "type": "string" },
+        "options": { "type": "array", "items": { "$ref": "PollOption" } },
+        "totalVotes": { "type": "number" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" }
+      },
+      "required": ["id", "question", "options", "createdBy"]
+    },
+    "PollOption": {
+      "title": "PollOption",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "votes": { "type": "number" }
+      },
+      "required": ["id", "text", "votes"]
+    },
+    "SocialComment": {
+      "title": "SocialComment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "postId": { "type": "string" },
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "text": { "type": "string" },
+        "parentId": { "type": "string" },
+        "likesCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "postId", "userId", "text", "createdAt"]
+    },
+    "SocialNotification": {
+      "title": "SocialNotification",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "recipientId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "type": { "type": "string", "enum": ["like", "comment", "reply", "follow", "poll_vote", "ad_update"] },
+        "targetId": { "type": "string" },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "recipientId", "type", "createdAt"]
+    },
+    "FeedPost": {
+      "title": "FeedPost",
+      "description": "Activity stream post.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "content": { "type": "string" },
+        "contentHtml": { "type": "string" },
+        "type": { "type": "string", "enum": ["post", "task", "crm_activity", "deal_update", "lead_created", "system", "announcement"] },
+        "entityType": { "type": "string" },
+        "entityId": { "type": "string" },
+        "mentions": { "type": "array", "items": { "type": "string" } },
+        "attachments": { "type": "array", "items": { "type": "object" } },
+        "reactions": { "type": "object" },
+        "likesCount": { "type": "number" },
+        "commentsCount": { "type": "number" },
+        "isPinned": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "authorId", "type", "createdAt"]
+    },
+    "FeedComment": {
+      "title": "FeedComment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "postId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "content": { "type": "string" },
+        "parentId": { "type": "string" },
+        "mentions": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "postId", "authorId", "content", "createdAt"]
+    },
+    "CRMWorkspace": {
+      "title": "CRMWorkspace",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "owner_id": { "type": "string" },
+        "settings": { "type": "object" },
+        "created_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CRMWorkspaceMember": {
+      "title": "CRMWorkspaceMember",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "workspace_id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "role": { "type": "string" },
+        "joined_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CRMAutomation": {
+      "title": "CRMAutomation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "pipeline_id": { "type": "string" },
+        "stage_id": { "type": "string" },
+        "name": { "type": "string" },
+        "trigger": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "config": { "type": "object" }
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string" },
+              "config": { "type": "object" }
+            }
+          }
+        },
+        "is_active": { "type": "boolean" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "CRMNotification": {
+      "title": "CRMNotification",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "dealId": { "type": "string" },
+        "dealTitle": { "type": "string" },
+        "structureId": { "type": "string" },
+        "structureSlug": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdBy": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" },
+            "avatar": { "type": "string" }
+          },
+          "required": ["id", "name"]
+        },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "type", "title", "description", "dealId", "dealTitle", "userId", "read", "createdAt", "createdBy"]
+    },
+    "SmartProcess": {
+      "title": "SmartProcess",
+      "description": "A customizable workflow process.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" },
+        "color": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "slug"]
+    },
+    "SmartRecord": {
+      "title": "SmartRecord",
+      "description": "A record within a smart process.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "process_id": { "type": "string" },
+        "data": { "type": "object" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "process_id", "data"]
+    },
+    "SmartFieldDefinition": {
+      "title": "SmartFieldDefinition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "process_id": { "type": "string" },
+        "label": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "number", "date", "textarea", "checkbox"] },
+        "required": { "type": "boolean" },
+        "order": { "type": "number" }
+      },
+      "required": ["id", "process_id", "label", "type"]
+    }
+  },
+  "firestore": {
+    "/crm_structures/{id}": {
+      "schema": "object",
+      "description": "CRM Pipeline structures."
+    },
+    "/crm_stages/{id}": {
+      "schema": "object",
+      "description": "CRM Stages."
+    },
+    "/crm_deals/{id}": {
+      "schema": "object",
+      "description": "CRM Deals."
+    },
+    "/crm_activities/{id}": {
+      "schema": "object",
+      "description": "CRM Activities."
+    },
+    "/crm_automations/{id}": {
+      "schema": "CRMAutomation",
+      "description": "CRM Automations."
+    },
+    "/crm_field_definitions/{id}": {
+      "schema": "object",
+      "description": "Custom field definitions."
+    },
+    "/crm_form_results/{id}": {
+      "schema": "object",
+      "description": "External form submissions."
+    },
+    "/smart_processes/{id}": {
+      "schema": "SmartProcess",
+      "description": "Smart process definitions."
+    },
+    "/smart_records/{id}": {
+      "schema": "SmartRecord",
+      "description": "Smart process records."
+    },
+    "/smart_fields/{id}": {
+      "schema": "SmartFieldDefinition",
+      "description": "Custom fields for smart processes."
+    },
+    "/whatsapp_messages/{id}": {
+      "schema": "WhatsAppMessage",
+      "description": "WhatsApp chat messages."
+    },
+    "/whatsapp_templates/{id}": {
+      "schema": "WhatsAppTemplate",
+      "description": "Approved WhatsApp templates."
+    },
+    "/calendar_events/{id}": {
+      "schema": "CRMCalendarEvent",
+      "description": "CRM Calendar events and meetings."
+    },
+    "/crm_tasks/{id}": {
+      "schema": "CRMTask",
+      "description": "CRM Tasks management."
+    },
+    "/crm_files/{id}": {
+      "schema": "CRMFile",
+      "description": "CRM File metadata storage."
+    },
+    "/crm_signatures/{id}": {
+      "schema": "CRMSignature",
+      "description": "Electronic signature requests and status."
+    },
+    "/crm_products/{id}": {
+      "schema": "CRMProduct",
+      "description": "CRM Product catalog."
+    },
+    "/crm_quotes/{id}": {
+      "schema": "CRMQuote",
+      "description": "CRM Quotations for deals."
+    },
+    "/crm_portal_access/{id}": {
+      "schema": "ClientPortalAccess",
+      "description": "Tokens for client portal access."
+    },
+    "/crm_workspaces/{id}": {
+      "schema": "CRMWorkspace",
+      "description": "CRM Workspaces (Companies)."
+    },
+    "/crm_workspace_members/{id}": {
+      "schema": "CRMWorkspaceMember",
+      "description": "User memberships for workspaces."
+    },
+    "/notifications/{notifId}": {
+      "schema": "CRMNotification",
+      "description": "Real-time CRM notifications."
+    },
+    "/social_users/{userId}": {
+      "schema": "SocialUser",
+      "description": "Social media user profiles."
+    },
+    "/social_posts/{postId}": {
+      "schema": "SocialPost",
+      "description": "Feed posts."
+    },
+    "/social_polls/{pollId}": {
+      "schema": "SocialPoll",
+      "description": "Interactive polls."
+    },
+    "/social_comments/{commentId}": {
+      "schema": "SocialComment",
+      "description": "Threaded comments."
+    },
+    "/social_notifications/{notifId}": {
+      "schema": "SocialNotification",
+      "description": "User notifications."
+    },
+    "/social_followers/{id}": {
+      "schema": "object",
+      "description": "Relationship between users (follower_id + following_id)."
+    },
+    "/social_likes/{id}": {
+      "schema": "object",
+      "description": "Likes on posts and comments."
+    },
+    "/social_saved/{id}": {
+      "schema": "object",
+      "description": "Saved posts by user."
+    },
+    "/tenants/{tenantId}": {
+      "schema": "Tenant",
+      "description": "Tenant organization data."
+    },
+    "/tenants/{tenantId}/users/{userId}": {
+      "schema": "User",
+      "description": "Users belonging to a tenant."
+    },
+    "/tenants/{tenantId}/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Sales leads."
+    },
+    "/tenants/{tenantId}/deals/{dealId}": {
+      "schema": "Deal",
+      "description": "Sales deals."
+    },
+    "/tenants/{tenantId}/contacts/{contactId}": {
+      "schema": "Contact",
+      "description": "CRM contacts."
+    },
+    "/tenants/{tenantId}/companies/{companyId}": {
+      "schema": "Company",
+      "description": "CRM companies."
+    },
+    "/tenants/{tenantId}/pipelines/{pipelineId}": {
+      "schema": "Pipeline",
+      "description": "Sales pipelines."
+    },
+    "/tenants/{tenantId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Tasks."
+    },
+    "/tenants/{tenantId}/activities/{activityId}": {
+      "schema": "Activity",
+      "description": "CRM activities."
+    },
+    "/tenants/{tenantId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Chat messages."
+    },
+    "/tenants/{tenantId}/automations/{automationId}": {
+      "schema": "Automation",
+      "description": "CRM automations."
+    },
+    "/tenants/{tenantId}/client_records/{clientId}": {
+      "schema": "NexusClient",
+      "description": "Nexus Clients."
+    },
+    "/tenants/{tenantId}/nexus_finanza/{id}": {
+      "schema": "NexusRecord",
+      "description": "Finanza Agevolata records."
+    },
+    "/tenants/{tenantId}/nexus_digitale/{id}": {
+      "schema": "NexusRecord",
+      "description": "Digitale records."
+    },
+    "/tenants/{tenantId}/nexus_consulenze/{id}": {
+      "schema": "NexusRecord",
+      "description": "Consulenze records."
+    },
+    "/tenants/{tenantId}/nexus_eventi/{id}": {
+      "schema": "NexusRecord",
+      "description": "Organizzazione Eventi records."
+    },
+    "/tenants/{tenantId}/nexus_prodotti/{id}": {
+      "schema": "NexusRecord",
+      "description": "Prodotti e servizi records."
+    },
+    "/tenants/{tenantId}/nexus_formazione/{id}": {
+      "schema": "NexusRecord",
+      "description": "Formazione records."
+    },
+    "/tenants/{tenantId}/nexus_coworking/{id}": {
+      "schema": "NexusRecord",
+      "description": "Coworking records."
+    },
+    "/tenants/{tenantId}/nexus_prenotazioni/{id}": {
+      "schema": "NexusRecord",
+      "description": "Prenotazioni Online records."
+    },
+    "/tenants/{tenantId}/nexus_economie/{id}": {
+      "schema": "NexusRecord",
+      "description": "Economie Nexus records."
+    },
+    "/tenants/{tenantId}/quotes/{quoteId}": {
+      "schema": "Quote",
+      "description": "Sales quotes."
+    },
+    "/tenants/{tenantId}/nexus_preventivi/{id}": {
+      "schema": "NexusPreventivo",
+      "description": "Nexus specific quotes."
+    },
+    "/tenants/{tenantId}/feed_posts/{postId}": {
+      "schema": "FeedPost",
+      "description": "Activity feed posts."
+    },
+    "/tenants/{tenantId}/feed_comments/{commentId}": {
+      "schema": "FeedComment",
+      "description": "Activity feed comments."
+    }
+  }
+}
