@@ -31,6 +31,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { getInactivityData } from '@/lib/reminderUtils';
+import LeadScoreBadge from '../LeadScoreBadge';
 
 interface DealCardProps {
   deal: CRMDeal;
@@ -259,7 +260,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, isPreanalysis }) => {
         </div>
       )}
       <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col min-w-0">
+        <div className="flex flex-col min-w-0 flex-1">
           <h4 className="text-[11px] md:text-[12px] xl:text-[13px] font-black text-slate-800 leading-tight uppercase tracking-tight truncate">
             {deal.company || deal.title}
           </h4>
@@ -291,12 +292,13 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, isPreanalysis }) => {
           )}
         </div>
         
-        {/* Value on top right for desktop for better visual balance */}
-        {!isLead && (
-          <div className="hidden xl:block shrink-0">
-            <span className="text-[12px] font-black text-emerald-600 tracking-tight">€{deal.value.toLocaleString()}</span>
-          </div>
-        )}
+        {/* Lead score badge OR deal value */}
+        <div className="shrink-0 flex flex-col items-end gap-1">
+          <LeadScoreBadge leadId={deal.id} size="sm" />
+          {!isLead && (
+            <span className="hidden xl:block text-[12px] font-black text-emerald-600 tracking-tight">€{deal.value.toLocaleString()}</span>
+          )}
+        </div>
 
         {deal.preanalysis_result && (
           <Badge className={cn(

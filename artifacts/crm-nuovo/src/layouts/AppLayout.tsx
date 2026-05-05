@@ -93,6 +93,7 @@ import { useCRMStore } from '@/stores/crmStore';
 import { format } from 'date-fns';
 import QuickCreate from '../components/QuickCreate';
 import OnlineDot from '../components/OnlineDot';
+import WorkdayTimer from '../components/WorkdayTimer';
 import { usePresence } from '@/hooks/usePresence';
 import { usePresenceStore } from '@/stores/presenceStore';
 import { useDesktopNotifications } from '@/hooks/useDesktopNotifications';
@@ -544,10 +545,7 @@ const AppLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 lg:gap-4">
-            <div className="hidden xl:flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-xs font-bold text-white/70 backdrop-blur-md">
-              <Clock size={14} className="text-[#2FC6F6]" />
-              <span>{format(new Date(), 'HH:mm')}</span>
-            </div>
+            <WorkdayTimer />
 
             <NotificationCenter onDealClick={handleDealClick} />
 
