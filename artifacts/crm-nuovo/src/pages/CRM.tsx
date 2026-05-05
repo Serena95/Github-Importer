@@ -51,6 +51,8 @@ import { CompanyList } from '@/components/crm/CompanyList';
 import { AutomationBuilder } from '@/components/crm/AutomationBuilder';
 import { AutomationList } from '@/components/crm/AutomationList';
 import { CRMConfig } from '@/components/crm/CRMConfig';
+import { useLeadScoreStore } from '@/stores/leadScoreStore';
+import { Sparkles, Loader2 as Loader } from 'lucide-react';
 
 const CRM: React.FC<{ activeTab?: string, setActiveTab: (tab: string) => void }> = ({ activeTab: propActiveTab, setActiveTab }) => {
   const navigate = useNavigate();
@@ -67,6 +69,7 @@ const CRM: React.FC<{ activeTab?: string, setActiveTab: (tab: string) => void }>
     setFilters,
     crmView,
     setCRMView,
+    getFilteredDeals,
     initialLoadDone: storeInitialLoadDone
   } = useCRMStore();
 
@@ -78,6 +81,8 @@ const CRM: React.FC<{ activeTab?: string, setActiveTab: (tab: string) => void }>
   const [editingAutomation, setEditingAutomation] = useState<any>(null);
   const [isAutomationBuilderOpen, setIsAutomationBuilderOpen] = useState(false);
   const [automationRefreshKey, setAutomationRefreshKey] = useState(0);
+
+  const { scoreLeads, isBatchRunning, batchProgress, batchTotal } = useLeadScoreStore();
 
   // Sync active view tab with URL (propActiveTab)
   useEffect(() => {
@@ -373,6 +378,29 @@ const CRM: React.FC<{ activeTab?: string, setActiveTab: (tab: string) => void }>
                   <button onClick={() => setCRMView('calendar')} className={cn("px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all", crmView === 'calendar' ? "bg-white shadow-sm text-blue-600" : "text-slate-500 hover:text-slate-700")}>Calendario</button>
                 )}
               </div>
+            )}
+            {activeViewTab === 'leads' && (
+              <button
+                onClick={() => {
+                  const leads = getFilteredDeals();
+                  if (leads.length) scoreLeads(leads);
+                }}
+                disabled={isBatchRunning}
+                className="hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 text-white text-[10px] font-black uppercase tracking-wider hover:opacity-90 transition-opacity disabled:opacity-60 shadow-md shadow-purple-200 shrink-0"
+                title="Fai valutare tutti i lead dal CoPilot AI"
+              >
+                {isBatchRunning ? (
+                  <>
+                    <Loader size={12} className="animate-spin" />
+                    {batchProgress}/{batchTotal}
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={12} />
+                    Score AI
+                  </>
+                )}
+              </button>
             )}
             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 bg-white border border-slate-200 shadow-sm"><Download size={15} /></Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 bg-white border border-slate-200 shadow-sm"><MoreHorizontal size={15} /></Button>

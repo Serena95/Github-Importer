@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Mail, Phone, User, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Lead } from '@/types';
+import LeadScoreBadge from './LeadScoreBadge';
 
 export const LeadCard: React.FC<{ lead: Lead }> = ({ lead }) => {
   return (
@@ -14,6 +15,7 @@ export const LeadCard: React.FC<{ lead: Lead }> = ({ lead }) => {
           <h4 className="font-black text-sm text-brand-blue leading-tight flex-1 group-hover:text-brand-yellow transition-colors pr-6 uppercase tracking-tight">
             {lead.title}
           </h4>
+          <LeadScoreBadge leadId={lead.id} size="sm" />
         </div>
         
         <div className="flex items-center gap-2 mb-4">
