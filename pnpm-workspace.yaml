@@ -158,3 +158,26 @@ overrides:
   # drizzle-kit uses esbuild internally on an older version that's vulnerable, this overrides it
   "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
   esbuild: "0.27.3"
+  # ============================================================================
+  # SECURITY: Vulnerability fixes for transitive dependencies
+  # ============================================================================
+  # picomatch: GHSA-c2c7-rcm5-vvqj, GHSA-3v7f-55p6-f55p — patched >=4.0.4
+  picomatch: "4.0.4"
+  # undici: GHSA-f269-vfmq-vjvj, GHSA-v9p9-hfj2-hcw8, GHSA-vrm6-8vpv-qv8q,
+  #         GHSA-2mjp-6q6p-2qxm, GHSA-4992-7rv2-5pvq, GHSA-c76h-2ccp-4975,
+  #         GHSA-g9mf-h72j-4rw9, GHSA-cxrh-j4jr-qwg3 — patched >=6.24.0
+  undici: "6.25.0"
+  # path-to-regexp: GHSA-j3q9-mxjg-w52f, GHSA-27v5-c462-wpq7 — patched >=8.4.0
+  path-to-regexp: "8.4.2"
+  # lodash: GHSA-r5fr-rjxr-66jc, GHSA-f23m-r3pf-42rh — patched >=4.18.0
+  lodash: "4.18.1"
+  # dompurify: GHSA-39q2-94rc-95cp, GHSA-cj63-jhhr-wcxv, GHSA-cjmm-f4jc-qw8r,
+  #            GHSA-crv5-9vww-q3g8, GHSA-h7mw-gpvr-xq4m, GHSA-h8r8-wccr-v5f2,
+  #            GHSA-vhxf-7vqr-mrjg — patched >=3.4.0
+  dompurify: "3.4.2"
+  # brace-expansion: GHSA-f886-m6hf-6m8v — patched >=2.0.3
+  brace-expansion: "2.1.0"
+  # yaml: GHSA-48c2-rrv3-qjmp — patched >=2.8.3
+  yaml: "2.8.4"
+  # postcss: GHSA-qx2v-qp2m-jg93 — patched >=8.5.10
+  postcss: "8.5.13"
