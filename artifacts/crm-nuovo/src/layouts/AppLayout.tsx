@@ -167,6 +167,10 @@ const AppLayout: React.FC = () => {
       navigate(`/crm/${tab}`);
     } else if (tab.startsWith('dashboard-')) {
       navigate(`/dashboard/${tab.replace('dashboard-', '')}`);
+    } else if (tab.startsWith('cc-')) {
+      navigate(`/contact-center/${tab.replace('cc-', '')}`);
+    } else if (tab.startsWith('chat-')) {
+      navigate(`/chat/${tab.replace('chat-', '')}`);
     } else {
       // Fallback for others
       navigate(`/${tab.replace('-', '/')}`);
