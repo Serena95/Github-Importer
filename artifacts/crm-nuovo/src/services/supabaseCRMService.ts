@@ -1026,7 +1026,10 @@ export const supabaseCRMService = {
       }
       const snap = await getDocs(q);
       return snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as CRMAutomation));
-    } catch (e) {
+    } catch (e: any) {
+      if (e?.code === 'permission-denied' || (e?.message && e.message.includes('Missing or insufficient permissions'))) {
+        return [];
+      }
       handleFirestoreError(e, OperationType.GET, 'crm_automations');
       throw e;
     }
