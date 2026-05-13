@@ -57,6 +57,9 @@ import {
   FolderPlus,
   GitBranch,
   Headphones,
+  Code,
+  Package,
+  Globe,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ChatAgente from '../components/crm/ChatAgente';
@@ -348,13 +351,19 @@ const AppLayout: React.FC = () => {
       { id: 'analytics-pipeline', label: 'Pipeline', icon: GitBranch },
     ], roles: ['admin', 'manager'] },
     { id: 'contact-center', label: 'Contact center', icon: Headphones, subItems: [
+      { id: 'cc-overview', label: 'Panoramica', icon: Grid },
       { id: 'cc-livechat', label: 'Live chat', icon: MessageSquare },
-      { id: 'cc-whatsapp', label: 'WhatsApp', icon: MessageSquare },
+      { id: 'cc-whatsapp', label: 'WhatsApp', icon: Smartphone },
+      { id: 'cc-email', label: 'Email', icon: Mail },
       { id: 'cc-telegram', label: 'Telegram', icon: Send },
+      { id: 'cc-facebook', label: 'Facebook', icon: Globe },
+      { id: 'cc-instagram', label: 'Instagram', icon: Target },
     ], roles: ['admin', 'manager', 'commerciale'] },
     { id: 'apps', label: 'Applicazioni', icon: Grid, subItems: [
-      { id: 'apps-marketplace', label: 'Marketplace app', icon: Store },
+      { id: 'apps-marketplace', label: 'Marketplace', icon: Store },
+      { id: 'apps-installed', label: 'Installate', icon: Package },
       { id: 'apps-integrations', label: 'Integrazioni', icon: Layers },
+      { id: 'apps-developer', label: 'Sviluppatori', icon: Code },
     ], roles: ['admin'] },
     { id: 'settings', label: 'Impostazioni', icon: SettingsIcon, subItems: [
       { id: 'settings-users', label: 'Utenti', icon: Users },
@@ -369,7 +378,7 @@ const AppLayout: React.FC = () => {
     return item.roles.includes(role || 'viewer');
   });
 
-  const SidebarContent = () => (
+  const sidebarContent = (
     <div className={cn(
       "flex flex-col h-full nexus-sidebar-gradient text-white/70 transition-all duration-300",
       isSidebarCollapsed ? "w-20" : "w-60"
@@ -511,7 +520,7 @@ const AppLayout: React.FC = () => {
         "hidden lg:flex flex-col z-30 shrink-0 transition-all duration-300",
         isSidebarCollapsed ? "w-20" : "w-60"
       )}>
-        <SidebarContent />
+        {sidebarContent}
       </aside>
 
       {/* Sidebar - Mobile */}
@@ -519,7 +528,7 @@ const AppLayout: React.FC = () => {
         "fixed inset-y-0 left-0 w-60 z-50 flex flex-col transition-transform duration-300 ease-in-out lg:hidden",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <SidebarContent />
+        {sidebarContent}
       </aside>
 
       {/* Main Content */}
