@@ -55,7 +55,6 @@ export const AutomationList: React.FC<AutomationListProps> = ({ pipeline, stages
       setAutomations(data);
     } catch (e) {
       console.error('Error loading automations:', e);
-      toast.error('Errore nel caricamento delle automazioni');
     } finally {
       setIsLoading(false);
     }
