@@ -481,9 +481,27 @@ const ContactCenter: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex bg-white overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-56 border-r border-slate-100 flex flex-col bg-slate-50/60 shrink-0">
+    <div className="h-full flex flex-col md:flex-row bg-white overflow-hidden">
+      {/* Mobile tab bar */}
+      <div className="flex md:hidden border-b border-slate-100 bg-white overflow-x-auto shrink-0">
+        {NAV_CHANNELS.map(ch => {
+          const active = channel === ch.id;
+          return (
+            <button key={ch.id} onClick={() => navigate(ch.path)}
+              className={cn("relative flex items-center gap-1.5 px-3 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-all",
+                active ? "border-blue-500 text-blue-600" : "border-transparent text-slate-400 hover:text-slate-600")}>
+              <ch.icon size={13}/>
+              {ch.label}
+              {ch.badge && ch.badge > 0 ? (
+                <span className="absolute top-1.5 right-1 w-3.5 h-3.5 rounded-full text-[8px] font-black flex items-center justify-center bg-red-500 text-white">{ch.badge}</span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Desktop sidebar */}
+      <div className="hidden md:flex md:w-56 border-r border-slate-100 flex-col bg-slate-50/60 shrink-0">
         <div className="p-4 border-b border-slate-100">
           <h2 className="text-sm font-black text-slate-800">Contact Center</h2>
           <p className="text-[10px] text-slate-400 mt-0.5">Omnicanale</p>
@@ -522,7 +540,7 @@ const ContactCenter: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         {/* Topbar */}
         <div className="h-14 px-5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
           <div className="flex items-center gap-2">
