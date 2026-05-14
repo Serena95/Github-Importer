@@ -48,6 +48,7 @@ const Webmail: React.FC = () => {
   const [search, setSearch] = useState('');
   const [composing, setComposing] = useState(false);
   const [composeData, setComposeData] = useState({ to: '', subject: '', body: '' });
+  const [mobilePanel, setMobilePanel] = useState<'folders' | 'list' | 'detail'>('folders');
 
   const folderEmails = emails.filter(e => {
     if (folder === 'starred') return e.starred;
@@ -60,7 +61,13 @@ const Webmail: React.FC = () => {
   };
   const markRead = (email: Email) => {
     setSelected(email);
+    setMobilePanel('detail');
     setEmails(prev => prev.map(e => e.id === email.id ? { ...e, read: true } : e));
+  };
+  const selectFolder = (key: FolderKey) => {
+    setFolder(key);
+    setSelected(null);
+    setMobilePanel('list');
   };
   const sendEmail = () => {
     if (!composeData.to || !composeData.subject) { toast.error('Compila destinatario e oggetto'); return; }
@@ -76,152 +83,196 @@ const Webmail: React.FC = () => {
     return format(t, 'dd MMM', { locale: it });
   };
 
-  return (
-    <div className="h-full flex bg-white overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-52 border-r border-slate-100 flex flex-col bg-slate-50/60 shrink-0">
-        <div className="p-3 border-b border-slate-100">
-          <button onClick={() => setComposing(true)}
-            className="w-full flex items-center justify-center gap-2 h-9 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-[11px] font-black uppercase tracking-wider shadow-md shadow-blue-100 transition-all">
-            <Plus size={13}/> Scrivi
+  const folderLabel = FOLDERS_CONFIG.find(f => f.key === folder)?.label ?? 'Posta in arrivo';
+
+  /* ── shared sub-components ── */
+  const foldersSidebar = (
+    <div className="flex flex-col h-full bg-slate-50/60">
+      <div className="p-3 border-b border-slate-100">
+        <button onClick={() => setComposing(true)}
+          className="w-full flex items-center justify-center gap-2 h-9 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-[11px] font-black uppercase tracking-wider shadow-md shadow-blue-100 transition-all">
+          <Plus size={13}/> Scrivi
+        </button>
+      </div>
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        {FOLDERS_CONFIG.map(f => (
+          <button key={f.key} onClick={() => selectFolder(f.key)}
+            className={cn("w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-sm font-bold",
+              folder === f.key ? "bg-blue-500 text-white shadow-md shadow-blue-100" : "text-slate-500 hover:bg-white hover:shadow-sm")}>
+            <f.icon size={15} className={folder === f.key ? "text-blue-200" : "text-slate-400"}/>
+            <span className="flex-1 text-left">{f.label}</span>
+            {f.count > 0 && (
+              <span className={cn("w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center",
+                folder === f.key ? "bg-white text-blue-600" : "bg-blue-500 text-white")}>
+                {f.count}
+              </span>
+            )}
           </button>
-        </div>
-        <nav className="flex-1 p-3 space-y-0.5">
-          {FOLDERS_CONFIG.map(f => (
-            <button key={f.key} onClick={() => { setFolder(f.key); setSelected(null); }}
-              className={cn("w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-sm font-bold",
-                folder === f.key ? "bg-blue-500 text-white shadow-md shadow-blue-100" : "text-slate-500 hover:bg-white hover:shadow-sm")}>
-              <f.icon size={15} className={folder === f.key ? "text-blue-200" : "text-slate-400"}/>
-              <span className="flex-1 text-left">{f.label}</span>
-              {f.count > 0 && (
-                <span className={cn("w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center",
-                  folder === f.key ? "bg-white text-blue-600" : "bg-blue-500 text-white")}>
-                  {f.count}
-                </span>
-              )}
-            </button>
-          ))}
-        </nav>
-        <div className="p-3 border-t border-slate-100">
-          <button onClick={() => toast.info('Aggiornamento posta')} className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-bold text-slate-400 hover:bg-white hover:text-blue-500 transition-all">
-            <RefreshCw size={13}/> Aggiorna
-          </button>
+        ))}
+      </nav>
+      <div className="p-3 border-t border-slate-100">
+        <button onClick={() => toast.info('Aggiornamento posta')} className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-bold text-slate-400 hover:bg-white hover:text-blue-500 transition-all">
+          <RefreshCw size={13}/> Aggiorna
+        </button>
+      </div>
+    </div>
+  );
+
+  const emailList = (
+    <div className="flex flex-col h-full bg-slate-50/20 min-h-0">
+      {/* Mobile back */}
+      <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-slate-100 bg-white">
+        <button onClick={() => setMobilePanel('folders')} className="flex items-center gap-1 text-blue-500 text-xs font-bold">
+          <ArrowLeft size={14}/> Cartelle
+        </button>
+        <span className="text-xs text-slate-400 font-medium">/ {folderLabel}</span>
+      </div>
+      <div className="p-3 border-b border-slate-100">
+        <div className="relative">
+          <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca email…" className="pl-8 h-8 text-xs rounded-xl bg-white border-slate-200"/>
         </div>
       </div>
-
-      {/* Email list */}
-      <div className={cn("border-r border-slate-100 flex flex-col bg-slate-50/20 shrink-0 transition-all min-h-0", selected ? "w-64" : "flex-1 max-w-sm")}>
-        <div className="p-3 border-b border-slate-100">
-          <div className="relative">
-            <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca email…" className="pl-8 h-8 text-xs rounded-xl bg-white border-slate-200"/>
+      <div className="flex-1 overflow-y-auto min-h-0 divide-y divide-slate-50">
+        {folderEmails.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-40 text-center">
+            <Mail size={24} className="text-slate-300 mb-2"/>
+            <p className="text-sm font-bold text-slate-400">Nessuna email</p>
           </div>
-        </div>
-        <div className="flex-1 overflow-y-auto min-h-0 divide-y divide-slate-50">
-          {folderEmails.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 text-center">
-              <Mail size={24} className="text-slate-300 mb-2"/>
-              <p className="text-sm font-bold text-slate-400">Nessuna email</p>
+        ) : folderEmails.map(email => (
+          <div key={email.id} onClick={() => markRead(email)} role="button" tabIndex={0}
+            onKeyDown={e => e.key === 'Enter' && markRead(email)}
+            className={cn("w-full text-left p-4 hover:bg-white transition-colors cursor-pointer",
+              selected?.id === email.id ? "bg-blue-50 border-l-2 border-blue-500" : !email.read ? "bg-white" : "")}>
+            <div className="flex items-start gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-0.5">
+                  <p className={cn("text-xs truncate", !email.read ? "font-black text-slate-800" : "font-medium text-slate-600")}>{email.from}</p>
+                  <div className="flex items-center gap-1 shrink-0 ml-1">
+                    {email.hasAttachment && <Paperclip size={9} className="text-slate-400"/>}
+                    <p className="text-[10px] text-slate-400">{formatTime(email.time)}</p>
+                  </div>
+                </div>
+                <p className={cn("text-[11px] truncate mb-0.5", !email.read ? "font-bold text-slate-700" : "font-medium text-slate-500")}>{email.subject}</p>
+                <p className="text-[10px] text-slate-400 truncate">{email.preview}</p>
+                {email.tags && email.tags.length > 0 && (
+                  <div className="flex gap-1 mt-1">
+                    {email.tags.map(tag => <span key={tag} className="text-[9px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md uppercase tracking-wider">{tag}</span>)}
+                  </div>
+                )}
+              </div>
+              <button onClick={e => toggleStar(email.id, e)} className="shrink-0 mt-0.5">
+                <Star size={12} className={cn("transition-colors", email.starred ? "fill-amber-400 text-amber-400" : "text-slate-200 hover:text-amber-300")}/>
+              </button>
             </div>
-          ) : folderEmails.map(email => (
-            <div key={email.id} onClick={() => markRead(email)} role="button" tabIndex={0}
-              onKeyDown={e => e.key === 'Enter' && markRead(email)}
-              className={cn("w-full text-left p-4 hover:bg-white transition-colors cursor-pointer",
-                selected?.id === email.id ? "bg-blue-50 border-l-2 border-blue-500" : !email.read ? "bg-white" : "")}>
-              <div className="flex items-start gap-2">
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const emailViewer = selected ? (
+    <div className="flex flex-col h-full bg-white min-h-0 min-w-0">
+      <div className="h-14 px-3 md:px-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <button onClick={() => { setSelected(null); setMobilePanel('list'); }}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-all shrink-0">
+            <ArrowLeft size={16}/>
+          </button>
+          <h3 className="font-bold text-slate-800 text-sm truncate">{selected.subject}</h3>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <button onClick={() => { setComposing(true); setComposeData({ to: selected.fromEmail, subject: `Re: ${selected.subject}`, body: '' }); }}
+            className="hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-bold transition-all">
+            <Reply size={13}/> Rispondi
+          </button>
+          <button className="sm:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-all"
+            onClick={() => { setComposing(true); setComposeData({ to: selected.fromEmail, subject: `Re: ${selected.subject}`, body: '' }); }}>
+            <Reply size={15}/>
+          </button>
+          <button className="hidden sm:flex w-8 h-8 items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-all"><ReplyAll size={15}/></button>
+          <button className="hidden sm:flex w-8 h-8 items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-all"><Forward size={15}/></button>
+          <button onClick={() => { setEmails(prev => prev.filter(e => e.id !== selected.id)); setSelected(null); setMobilePanel('list'); toast.success('Email eliminata'); }}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all"><Trash2 size={15}/></button>
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-auto min-h-0 p-4 md:p-6">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="border-b border-slate-100 pb-4">
+            <h2 className="text-base md:text-lg font-black text-slate-800 mb-3">{selected.subject}</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-sm font-black text-blue-700 shrink-0">
+                  {selected.from.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800 text-sm">{selected.from}</p>
+                  <p className="text-[11px] text-slate-400">{selected.fromEmail}</p>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-400">{format(selected.time, "d MMM yyyy 'alle' HH:mm", { locale: it })}</p>
+            </div>
+          </div>
+          <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{selected.body}</div>
+          {selected.hasAttachment && (
+            <div className="border border-slate-100 rounded-xl p-4">
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-3">Allegati</p>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center shrink-0"><FileSignature size={16} className="text-red-400"/></div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <p className={cn("text-xs truncate", !email.read ? "font-black text-slate-800" : "font-medium text-slate-600")}>{email.from}</p>
-                    <div className="flex items-center gap-1 shrink-0 ml-1">
-                      {email.hasAttachment && <Paperclip size={9} className="text-slate-400"/>}
-                      <p className="text-[10px] text-slate-400">{formatTime(email.time)}</p>
-                    </div>
-                  </div>
-                  <p className={cn("text-[11px] truncate mb-0.5", !email.read ? "font-bold text-slate-700" : "font-medium text-slate-500")}>{email.subject}</p>
-                  <p className="text-[10px] text-slate-400 truncate">{email.preview}</p>
-                  {email.tags && email.tags.length > 0 && (
-                    <div className="flex gap-1 mt-1">
-                      {email.tags.map(tag => <span key={tag} className="text-[9px] font-black bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md uppercase tracking-wider">{tag}</span>)}
-                    </div>
-                  )}
+                  <p className="text-sm font-bold text-slate-700 truncate">Proposta_Commerciale.pdf</p>
+                  <p className="text-[10px] text-slate-400">3.4 MB</p>
                 </div>
-                <button onClick={e => toggleStar(email.id, e)} className="shrink-0 mt-0.5">
-                  <Star size={12} className={cn("transition-colors", email.starred ? "fill-amber-400 text-amber-400" : "text-slate-200 hover:text-amber-300")}/>
-                </button>
+                <button onClick={() => toast.success('Download avviato')} className="text-[11px] font-bold text-blue-500 hover:text-blue-700 shrink-0">Scarica</button>
               </div>
             </div>
-          ))}
+          )}
+        </div>
+      </div>
+    </div>
+  ) : (
+    <div className="flex-1 flex items-center justify-center text-center bg-slate-50/30">
+      <div>
+        <div className="w-16 h-16 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-4"><Mail size={28} className="text-slate-400"/></div>
+        <p className="font-bold text-slate-600 mb-1">Nessuna email selezionata</p>
+        <p className="text-sm text-slate-400">Clicca su un'email per leggerla</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="h-full flex flex-col md:flex-row bg-white overflow-hidden relative">
+
+      {/* ── MOBILE: one panel at a time ── */}
+      <div className="flex md:hidden flex-col h-full w-full min-h-0">
+        {mobilePanel === 'folders' && (
+          <div className="flex-1 min-h-0 overflow-hidden">{foldersSidebar}</div>
+        )}
+        {mobilePanel === 'list' && (
+          <div className="flex-1 min-h-0 overflow-hidden">{emailList}</div>
+        )}
+        {mobilePanel === 'detail' && (
+          <div className="flex-1 min-h-0 overflow-hidden">{emailViewer}</div>
+        )}
+      </div>
+
+      {/* ── DESKTOP: three columns ── */}
+      <div className="hidden md:flex flex-1 overflow-hidden min-h-0">
+        {/* Sidebar */}
+        <div className="w-52 border-r border-slate-100 shrink-0">{foldersSidebar}</div>
+        {/* Email list */}
+        <div className={cn("border-r border-slate-100 shrink-0 transition-all min-h-0 flex flex-col", selected ? "w-64" : "flex-1 max-w-sm")}>
+          {emailList}
+        </div>
+        {/* Viewer */}
+        <div className="flex-1 min-w-0 flex flex-col min-h-0">
+          {!composing ? emailViewer : null}
         </div>
       </div>
 
-      {/* Email viewer */}
-      {selected ? (
-        <div className="flex-1 flex flex-col overflow-hidden bg-white min-h-0 min-w-0">
-          <div className="h-14 px-5 border-b border-slate-100 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <button onClick={() => setSelected(null)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-all">
-                <ArrowLeft size={16}/>
-              </button>
-              <h3 className="font-bold text-slate-800 text-sm truncate max-w-xs">{selected.subject}</h3>
-            </div>
-            <div className="flex items-center gap-1">
-              <button onClick={() => { setComposing(true); setComposeData({ to: selected.fromEmail, subject: `Re: ${selected.subject}`, body: '' }); }}
-                className="flex items-center gap-1.5 px-3 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-bold transition-all">
-                <Reply size={13}/> Rispondi
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-all"><ReplyAll size={15}/></button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-all"><Forward size={15}/></button>
-              <button onClick={() => { setEmails(prev => prev.filter(e => e.id !== selected.id)); setSelected(null); toast.success('Email eliminata'); }}
-                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all"><Trash2 size={15}/></button>
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto min-h-0 p-6">
-            <div className="max-w-2xl mx-auto space-y-6">
-              <div className="border-b border-slate-100 pb-4">
-                <h2 className="text-lg font-black text-slate-800 mb-3">{selected.subject}</h2>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-sm font-black text-blue-700">
-                      {selected.from.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-bold text-slate-800 text-sm">{selected.from}</p>
-                      <p className="text-[11px] text-slate-400">{selected.fromEmail}</p>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-slate-400">{format(selected.time, "d MMMM yyyy 'alle' HH:mm", { locale: it })}</p>
-                </div>
-              </div>
-              <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{selected.body}</div>
-              {selected.hasAttachment && (
-                <div className="border border-slate-100 rounded-xl p-4">
-                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-3">Allegati</p>
-                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                    <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center"><FileSignature size={16} className="text-red-400"/></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-bold text-slate-700">Proposta_Commerciale.pdf</p>
-                      <p className="text-[10px] text-slate-400">3.4 MB</p>
-                    </div>
-                    <button onClick={() => toast.success('Download avviato')} className="text-[11px] font-bold text-blue-500 hover:text-blue-700">Scarica</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : !composing ? (
-        <div className="flex-1 flex items-center justify-center text-center bg-slate-50/30">
-          <div>
-            <div className="w-16 h-16 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-4"><Mail size={28} className="text-slate-400"/></div>
-            <p className="font-bold text-slate-600 mb-1">Nessuna email selezionata</p>
-            <p className="text-sm text-slate-400">Clicca su un'email per leggerla</p>
-          </div>
-        </div>
-      ) : null}
-
-      {/* Compose panel */}
+      {/* Compose panel — adapts to mobile */}
       {composing && (
-        <div className="absolute bottom-0 right-6 w-[520px] bg-white border border-slate-200 rounded-t-2xl shadow-2xl overflow-hidden z-50">
+        <div className="absolute bottom-0 right-0 md:right-6 w-full md:w-[520px] bg-white border border-slate-200 rounded-t-2xl shadow-2xl overflow-hidden z-50">
           <div className="px-4 py-3 bg-slate-800 flex items-center justify-between">
             <p className="text-sm font-black text-white">Nuovo messaggio</p>
             <button onClick={() => setComposing(false)} className="text-slate-400 hover:text-white transition-colors"><X size={16}/></button>
@@ -231,7 +282,7 @@ const Webmail: React.FC = () => {
             <Input value={composeData.subject} onChange={e => setComposeData(p => ({ ...p, subject: e.target.value }))} placeholder="Oggetto" className="border-0 rounded-none px-4 h-10 text-sm focus-visible:ring-0"/>
           </div>
           <textarea value={composeData.body} onChange={e => setComposeData(p => ({ ...p, body: e.target.value }))}
-            className="w-full h-48 px-4 py-3 text-sm text-slate-700 resize-none outline-none placeholder:text-slate-400"
+            className="w-full h-40 md:h-48 px-4 py-3 text-sm text-slate-700 resize-none outline-none placeholder:text-slate-400"
             placeholder="Scrivi il messaggio…"/>
           <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">

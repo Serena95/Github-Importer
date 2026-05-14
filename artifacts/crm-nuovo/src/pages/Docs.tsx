@@ -247,8 +247,20 @@ const Docs: React.FC = () => {
   const cur = NAV.find(n => n.id === section);
 
   return (
-    <div className="h-full flex bg-white overflow-hidden">
-      <div className="w-52 border-r border-slate-100 flex flex-col bg-slate-50/60 shrink-0">
+    <div className="h-full flex flex-col md:flex-row bg-white overflow-hidden">
+      {/* Mobile tab bar */}
+      <div className="flex md:hidden border-b border-slate-100 bg-white overflow-x-auto shrink-0">
+        {NAV.map(item => (
+          <button key={item.id} onClick={() => navigate(item.path)}
+            className={cn("flex items-center gap-1.5 px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-all",
+              section === item.id ? "border-blue-500 text-blue-600" : "border-transparent text-slate-400 hover:text-slate-600")}>
+            <item.icon size={13}/>{item.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Desktop sidebar */}
+      <div className="hidden md:flex md:w-52 border-r border-slate-100 flex-col bg-slate-50/60 shrink-0">
         <div className="p-4 border-b border-slate-100">
           <h2 className="text-sm font-black text-slate-800">Documenti</h2>
           <p className="text-[10px] text-slate-400 mt-0.5">Gestione file aziendali</p>
@@ -272,7 +284,7 @@ const Docs: React.FC = () => {
           </button>
         </div>
       </div>
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         <div className="h-14 px-5 border-b border-slate-100 flex items-center gap-2 bg-white shrink-0">
           {cur && <><cur.icon size={16} className="text-slate-400"/><h2 className="font-black text-slate-800 text-sm">{cur.label}</h2></>}
         </div>
