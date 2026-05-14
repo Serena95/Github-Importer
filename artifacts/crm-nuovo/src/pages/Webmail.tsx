@@ -110,22 +110,23 @@ const Webmail: React.FC = () => {
       </div>
 
       {/* Email list */}
-      <div className={cn("border-r border-slate-100 flex flex-col bg-slate-50/20 shrink-0 transition-all", selected ? "w-64" : "flex-1 max-w-sm")}>
+      <div className={cn("border-r border-slate-100 flex flex-col bg-slate-50/20 shrink-0 transition-all min-h-0", selected ? "w-64" : "flex-1 max-w-sm")}>
         <div className="p-3 border-b border-slate-100">
           <div className="relative">
             <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
             <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca email…" className="pl-8 h-8 text-xs rounded-xl bg-white border-slate-200"/>
           </div>
         </div>
-        <div className="flex-1 overflow-auto divide-y divide-slate-50">
+        <div className="flex-1 overflow-y-auto min-h-0 divide-y divide-slate-50">
           {folderEmails.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-center">
               <Mail size={24} className="text-slate-300 mb-2"/>
               <p className="text-sm font-bold text-slate-400">Nessuna email</p>
             </div>
           ) : folderEmails.map(email => (
-            <button key={email.id} onClick={() => markRead(email)}
-              className={cn("w-full text-left p-4 hover:bg-white transition-colors",
+            <div key={email.id} onClick={() => markRead(email)} role="button" tabIndex={0}
+              onKeyDown={e => e.key === 'Enter' && markRead(email)}
+              className={cn("w-full text-left p-4 hover:bg-white transition-colors cursor-pointer",
                 selected?.id === email.id ? "bg-blue-50 border-l-2 border-blue-500" : !email.read ? "bg-white" : "")}>
               <div className="flex items-start gap-2">
                 <div className="flex-1 min-w-0">
@@ -148,14 +149,14 @@ const Webmail: React.FC = () => {
                   <Star size={12} className={cn("transition-colors", email.starred ? "fill-amber-400 text-amber-400" : "text-slate-200 hover:text-amber-300")}/>
                 </button>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       </div>
 
       {/* Email viewer */}
       {selected ? (
-        <div className="flex-1 flex flex-col overflow-hidden bg-white">
+        <div className="flex-1 flex flex-col overflow-hidden bg-white min-h-0 min-w-0">
           <div className="h-14 px-5 border-b border-slate-100 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <button onClick={() => setSelected(null)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-all">
@@ -174,7 +175,7 @@ const Webmail: React.FC = () => {
                 className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all"><Trash2 size={15}/></button>
             </div>
           </div>
-          <div className="flex-1 overflow-auto p-6">
+          <div className="flex-1 overflow-y-auto min-h-0 p-6">
             <div className="max-w-2xl mx-auto space-y-6">
               <div className="border-b border-slate-100 pb-4">
                 <h2 className="text-lg font-black text-slate-800 mb-3">{selected.subject}</h2>

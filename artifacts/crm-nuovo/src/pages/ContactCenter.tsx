@@ -375,7 +375,7 @@ const InboxSection: React.FC<{ channelId: 'livechat' | 'whatsapp' }> = ({ channe
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-auto p-5 space-y-3 bg-slate-50/30">
+          <div className="flex-1 overflow-y-auto min-h-0 p-5 space-y-3 bg-slate-50/30">
             {msgs.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="w-10 h-10 bg-slate-100 rounded-2xl flex items-center justify-center mb-2"><MessageSquare size={18} className="text-slate-400"/></div>
