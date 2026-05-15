@@ -33,6 +33,7 @@ import CommercialDashboard from '@/pages/CommercialDashboard';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useCRMStore } from '@/stores/crmStore';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 
 const App: React.FC = () => {
   const { user, loading } = useAuth();
@@ -109,6 +110,7 @@ const App: React.FC = () => {
         <Route path="*" element={<Navigate to={user ? "/crm/affari" : "/login"} replace />} />
       </Routes>
       <Toaster position="top-right" />
+      <PWAInstallPrompt />
     </TooltipProvider>
   );
 };
